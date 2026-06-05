@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>问真级·全动态六柱精密八字细盘系统</title>
+    <title>问真级·全动态七柱精密八字细盘与古籍断语系统</title>
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.js"></script>
     <style>
         :root {
@@ -12,6 +12,7 @@
             --border-color: #e5e7eb;
             --text-dark: #1f2937;
             --text-muted: #4b5563;
+            --primary-gold: #b45309;
             
             /* 五行标准高精色彩体系 */
             --wuhang-mu: #16a34a;    /* 木 - 绿 */
@@ -24,7 +25,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background-color: var(--bg-main); color: var(--text-dark); padding: 15px; display: flex; flex-direction: column; align-items: center; }
         
-        .app-container { width: 100%; max-width: 850px; display: flex; flex-direction: column; gap: 14px; }
+        .app-container { width: 100%; max-width: 900px; display: flex; flex-direction: column; gap: 14px; }
         .card { background: var(--bg-card); border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 16px; border: 1px solid var(--border-color); }
 
         .form-title { font-size: 14px; font-weight: bold; margin-bottom: 12px; border-left: 4px solid #d97706; padding-left: 6px; color: #111827; }
@@ -36,19 +37,18 @@
 
         .meta-info { font-size: 12px; color: var(--text-muted); line-height: 1.6; background: #f9fafb; padding: 10px; border-radius: 6px; margin-bottom: 10px; border: 1px solid var(--border-color); }
 
-        /* 问真级 7列多维超矩阵布局 */
-        .bazi-grid { display: grid; grid-template-columns: 80px repeat(6, 1fr); border-left: 1px solid var(--border-color); border-top: 1px solid var(--border-color); margin-top: 10px; }
+        /* 问真级 8列多维超矩阵布局 (1标头 + 7时空柱) */
+        .bazi-grid { display: grid; grid-template-columns: 80px repeat(7, 1fr); border-left: 1px solid var(--border-color); border-top: 1px solid var(--border-color); margin-top: 10px; }
         .grid-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6px 2px; font-size: 12px; border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); text-align: center; background: #fff; min-height: 40px; }
         .header-cell { background: #f9fafb; font-weight: bold; color: #6b7280; font-size: 11px; }
-        .context-column { background: #f0fdf4; } /* 动态流年大运列浅色区分 */
+        .context-column { background: #f0fdf4; } /* 动态时空流转列浅色激活区分 */
         
         .text-gan, .text-zhi { font-size: 24px; font-weight: bold; margin: 1px 0; font-family: "KaiTi", "STKaiti", serif; }
         .mu { color: var(--wuhang-mu); } .huo { color: var(--wuhang-huo); } .tu { color: var(--wuhang-tu); } .jin { color: var(--wuhang-jin); } .shui { color: var(--wuhang-shui); }
 
-        .canggan-box { display: flex; flex-direction: column; gap: 1px; font-size: 10px; width: 100%; }
-        .canggan-row { display: flex; justify-content: space-around; width: 100%; padding: 0 2px; }
+        .canggan-row { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; font-size: 10px; line-height: 1.2; }
 
-        /* 联动态时间轴样式 */
+        /* 联动时间轴样式 */
         .timeline-section { display: flex; flex-direction: column; gap: 8px; }
         .scroll-wrapper { display: flex; overflow-x: auto; gap: 6px; padding-bottom: 6px; }
         .timeline-card { flex: 0 0 75px; background: #fff; border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 2px; text-align: center; font-size: 11px; cursor: pointer; transition: all 0.15s; }
@@ -56,15 +56,23 @@
         .card-title { font-weight: bold; font-size: 14px; margin: 1px 0; }
 
         /* 底部动态核心看板 */
-        .wangshuai-container { display: flex; width: 100%; border-radius: 4px; overflow: hidden; margin-bottom: 10px; font-size: 11px; font-weight: bold; text-align: center; }
+        .wangshuai-container { display: flex; width: 100%; border-radius: 4px; overflow: hidden; margin-bottom: 12px; font-size: 11px; font-weight: bold; text-align: center; }
         .wangshuai-item { flex: 1; padding: 4px 0; color: #fff; }
         .ws-wang { background-color: #b91c1c; } .ws-xiang { background-color: #c2410c; } .ws-xiu { background-color: #4b5563; } .ws-qiu { background-color: #6b7280; } .ws-si { background-color: #9ca3af; }
+
+        /* 五行高能精细进度条 */
+        .wuhang-score-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 12px; }
+        .wuhang-label { width: 55px; font-weight: bold; }
+        .progress-bar-bg { flex: 1; height: 12px; background: #e5e7eb; border-radius: 6px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; border-radius: 6px; transition: width 0.3s ease; }
 
         .liuyi-box { display: flex; flex-direction: column; gap: 6px; }
         .liuyi-row { display: flex; border: 1px solid var(--border-color); border-radius: 4px; overflow: hidden; font-size: 12px; }
         .liuyi-label { width: 80px; background: #f9fafb; padding: 8px; font-weight: bold; border-right: 1px solid var(--border-color); text-align: center; color: #4b5563; flex-shrink: 0; }
-        .liuyi-content { padding: 8px; line-height: 1.4; color: #111827; width: 100%; background: #fff; }
-        .badge-tag { display: inline-block; padding: 1px 4px; background: #f3f4f6; border-radius: 3px; margin-right: 4px; font-size: 10px; font-weight: bold; color: #374151; border: 1px solid #e5e7eb; }
+        .liuyi-content { padding: 8px; line-height: 1.4; color: #111827; width: 100%; background: #fff; display: flex; flex-wrap: wrap; gap: 6px; }
+        .badge-tag { display: inline-block; padding: 2px 6px; background: #f3f4f6; border-radius: 4px; font-size: 11px; font-weight: bold; color: #374151; border: 1px solid #e5e7eb; }
+        
+        .guji-content { background: #fffbf7; border-left: 4px solid #7f1d1d; padding: 12px; font-size: 12px; color: #374151; line-height: 1.6; font-style: italic; white-space: pre-wrap; border: 1px solid var(--border-color); border-left: 4px solid #7f1d1d; border-radius: 0 4px 4px 0; }
     </style>
 </head>
 <body>
@@ -85,7 +93,7 @@
     </div>
 
     <div class="card" id="result-card" style="display:none;">
-        <div class="form-title">问真级·专业八字六柱多维细盘</div>
+        <div class="form-title">问真级·专业八字七柱时空联动多维细盘</div>
         <div class="meta-info" id="meta-display"></div>
         <div class="bazi-grid" id="bazi-matrix"></div>
     </div>
@@ -98,9 +106,14 @@
             <div><span style="font-size:12px; font-weight:bold; color:var(--text-muted);">② 当前大运对应流年（点击联动主盘）</span></div>
             <div class="scroll-wrapper" id="liunian-timeline"></div>
 
-            <div><span style="font-size:12px; font-weight:bold; color:var(--text-muted);">③ 当前流年对应流月纪岁</span></div>
+            <div><span style="font-size:12px; font-weight:bold; color:var(--text-muted);">③ 当前流年对应流月纪岁（点击精确锁定流月）</span></div>
             <div class="scroll-wrapper" id="liuyue-timeline"></div>
         </div>
+    </div>
+
+    <div class="card" id="score-card" style="display:none;">
+        <div class="form-title">高精度五行旺衰量化透视表（计入月令加权与藏干细分解构）</div>
+        <div id="wuhang-scores-container"></div>
     </div>
 
     <div class="card" id="analysis-card" style="display:none;">
@@ -108,13 +121,15 @@
         <div class="wangshuai-container" id="wangshuai-panel"></div>
         <div class="liuyi-box">
             <div class="liuyi-row"><div class="liuyi-label">天干留意</div><div class="liuyi-content" id="gan-liuyi"></div></div>
-            <div class="liuyi-row"><div class="liuyi-label">地支留意</div><div class="liuyi-content" id="zhi-liuyi"></div></div>
+            <div class="liuyi-row"><div class="liuyi-label">地支修剪</div><div class="liuyi-content" id="zhi-liuyi"></div></div>
         </div>
+
+        <div class="form-title" style="margin-top:18px;">《三命通会》与经典理评动态匹配</div>
+        <div class="guji-content" id="guji-display"></div>
     </div>
 </div>
 
 <script>
-    // 基础核心字典储备
     const Gan = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
     const Zhi = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
     const WuhangMap = {
@@ -122,13 +137,14 @@
         "戊":"tu", "己":"tu", "辰":"tu", "戌":"tu", "丑":"tu", "未":"tu", "庚":"jin", "辛":"jin", 
         "申":"jin", "酉":"jin", "壬":"shui", "癸":"shui", "子":"shui", "亥":"shui"
     };
-    const CangGanFull = {
-        "子": ["癸"], "丑": ["己","癸","辛"], "寅": ["甲","丙","戊"], "卯": ["乙"],
-        "辰": ["戊","乙","癸"], "巳": ["丙","庚","戊"], "午": ["丁","己"], "未": ["己","丁","乙"],
-        "申": ["庚","壬","戊"], "酉": ["辛"], "戌": ["戊","辛","丁"], "亥": ["壬","甲"]
+    
+    // 精细化藏干气场分配比率模型
+    const CangGanPro = {
+        "子": {"癸":1.0}, "丑": {"己":0.6, "癸":0.3, "辛":0.1}, "寅": {"甲":0.6, "丙":0.3, "戊":0.1}, "卯": {"乙":1.0},
+        "辰": {"戊":0.6, "乙":0.3, "癸":0.1}, "巳": {"丙":0.6, "庚":0.3, "戊":0.1}, "午": {"丁":0.7, "己":0.3}, "未": {"己":0.6, "丁":0.3, "乙":0.1},
+        "申": {"庚":0.6, "壬":0.3, "戊":0.1}, "酉": {"辛":1.0}, "戌": {"戊":0.6, "辛":0.3, "丁":0.1}, "亥": {"壬":0.7, "甲":0.3}
     };
 
-    // 十二长生映射表
     const ChangShengTable = {
         "甲": {"亥":"长生","子":"沐浴","丑":"冠带","寅":"临官","卯":"帝旺","辰":"衰","巳":"病","午":"死","未":"墓","申":"绝","酉":"胎","戌":"养"},
         "丙": {"寅":"长生","卯":"沐浴","辰":"冠带","巳":"临官","午":"帝旺","未":"衰","申":"病","酉":"死","戌":"墓","亥":"绝","子":"胎","丑":"养"},
@@ -142,7 +158,16 @@
         "癸": {"卯":"长生","寅":"沐浴","丑":"冠带","子":"临官","亥":"帝旺","戌":"衰","酉":"病","申":"死","未":"墓","午":"绝","巳":"胎","辰":"养"}
     };
 
-    let globalState = { pillars: [], me: "", currentDaYun: "", currentLiuNian: "", rawBa: null };
+    // 《三命通会》深度古籍指引库
+    const SanMingDB = {
+        "甲子": "【甲子日柱断语】：甲木坐子水之上，水能生木，内藏癸水正印。主人心地慈祥，外貌清秀，一生多得长辈福荫。若生于申酉官杀月，有印化杀，多掌大权。",
+        "丙寅": "【丙寅日柱断语】：丙火坐寅木之上，木能生火，寅中另藏戊土食神、丙火比肩。水木清华，主人聪慧异常，才华横溢，且多得贤良配偶扶持。",
+        "戊申": "【戊申日柱断语】：戊土坐申金之上，土生金，内藏庚金食神、壬水偏财、戊土比肩。申金为财源之根，主人一生衣食丰足，善于经营或有一技之长。",
+        "庚午": "【庚午日柱断语】：庚金坐午火之上，火克金，内藏丁火正官、己土正印。官印自坐，主人为人作风正派，责任心强，中晚年多得名利。",
+        "壬戌": "【壬戌日柱断语】：壬水坐戌土之上，水克火，内藏戊土七杀、辛金正印、丁火正财。身坐财官印三奇之库，极易在政界或企业中独当一面，执掌重权。"
+    };
+
+    let globalState = { pillars: [], me: "", currentDaYun: "甲戌", currentLiuNian: "壬寅", currentLiuYue: "丙寅", rawBa: null };
 
     function calculate十神(me, target) {
         const meIdx = Gan.indexOf(me), tgIdx = Gan.indexOf(target);
@@ -170,24 +195,21 @@
         return Zhi[(startZhiIdx + 10) % 12] + Zhi[(startZhiIdx + 11) % 12];
     }
 
-    // 经典常用核心神煞过滤引擎
     function calculate神煞(me, pGan, pZhi, mZhi) {
         let stars = [];
-        // 天乙贵人
         if (["甲","戊"].includes(me) && ["丑","未"].includes(pZhi)) stars.push("天乙贵人");
         if (["乙","己"].includes(me) && ["子","申"].includes(pZhi)) stars.push("天乙贵人");
         if (["丙","丁"].includes(me) && ["亥","酉"].includes(pZhi)) stars.push("天乙贵人");
         if (["壬","癸"].includes(me) && ["卯","巳"].includes(pZhi)) stars.push("天乙贵人");
         if (me === "辛" && ["午","寅"].includes(pZhi)) stars.push("天乙贵人");
-        // 太极贵人
+        
         if (["甲","乙"].includes(me) && ["子","午"].includes(pZhi)) stars.push("太极贵人");
         if (["丙","丁"].includes(me) && ["卯","酉"].includes(pZhi)) stars.push("太极贵人");
-        // 天德贵人
+        
         if (mZhi === "寅" && pGan === "丁") stars.push("天德贵人");
         if (mZhi === "卯" && pZhi === "申") stars.push("天德贵人");
         if (mZhi === "戌" && pGan === "丙") stars.push("天德贵人");
-        if (stars.length === 0) return "--";
-        return stars.join("\n");
+        return stars.length === 0 ? "--" : stars.join("\n");
     }
 
     function update五行旺衰(monthZhi) {
@@ -202,13 +224,117 @@
         document.getElementById('wangshuai-panel').innerHTML = order.map(i => `<div class="wangshuai-item ${css[i.s]}">${i.k}${i.s}</div>`).join('');
     }
 
+    // 五行高精密加权量化核心引擎
+    function execute五行量化(currentPillars) {
+        let scores = { "mu": 0, "huo": 0, "tu": 0, "jin": 0, "shui": 0 };
+        
+        currentPillars.forEach(p => {
+            let wh = WuhangMap[p.gan];
+            if(scores[wh] !== undefined) scores[wh] += 12; // 天干计 12 分
+        });
+
+        currentPillars.forEach(p => {
+            let isMonthZhi = (p.name === "月柱");
+            let totalZhiWeight = isMonthZhi ? 36 : 18; // 月令权重为 36 独占，其他地支 18
+            let ratios = CangGanPro[p.zhi] || {};
+            for(let cg in ratios) {
+                let wh = WuhangMap[cg];
+                if(scores[wh] !== undefined) {
+                    scores[wh] += totalZhiWeight * ratios[cg];
+                }
+            }
+        });
+
+        let totalSum = scores.mu + scores.huo + scores.tu + scores.jin + scores.shui;
+        const keys = [
+            {k:"mu", n:"木气能量", c:"var(--wuhang-mu)"}, 
+            {k:"huo", n:"火气能量", c:"var(--wuhang-huo)"}, 
+            {k:"tu", n:"土气能量", c:"var(--wuhang-tu)"}, 
+            {k:"jin", n:"金气能量", c:"var(--wuhang-jin)"}, 
+            {k:"shui", n:"水气能量", c:"var(--wuhang-shui)"}
+        ];
+        
+        let html = "";
+        keys.forEach(item => {
+            let pct = totalSum > 0 ? ((scores[item.k] / totalSum) * 100).toFixed(1) : 0;
+            html += `
+                <div class="wuhang-score-row">
+                    <div class="wuhang-label" style="color:${item.c}">${item.n}</div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: ${pct}%; background-color: ${item.c};"></div>
+                    </div>
+                    <div style="width: 70px; text-align: right; font-weight: bold; color:${item.c}">${pct}%</div>
+                </div>
+            `;
+        });
+        document.getElementById('wuhang-scores-container').innerHTML = html;
+    }
+
+    // 问真级全方位动态多维交叉剪枝引擎
+    function calculate交叉修剪(currentPillars) {
+        let ganLogs = [], zhiLogs = [];
+        const allGans = currentPillars.map(p => p.gan);
+        const allZhis = currentPillars.map(p => p.zhi);
+        const zhisStr = allZhis.join('');
+
+        const stemHe = {"甲":"己", "己":"甲", "乙":"庚", "庚":"乙", "丙":"辛", "辛":"丙", "丁":"壬", "壬":"丁", "戊":"癸", "癸":"戊"};
+        const stemKe = {"甲":"戊", "乙":"己", "丙":"庚", "丁":"辛", "戊":"壬", "己":"癸", "庚":"甲", "辛":"乙", "壬":"丙", "癸":"丁"};
+        
+        const chongs = {"子":"午","午":"子","丑":"未","未":"丑","寅":"申","申":"寅","卯":"酉","酉":"卯","辰":"戌","戌":"辰","巳":"亥","亥":"巳"};
+        const hex = {"子":"丑","丑":"子","寅":"亥","亥":"寅","卯":"戌","戌":"卯","辰":"酉","酉":"辰","巳":"申","申":"巳","午":"未","未":"午"};
+        const hais = {"子":"未","未":"子","丑":"午","午":"丑","寅":"巳","巳":"寅","卯":"辰","辰":"卯","申":"亥","亥":"申","酉":"戌","戌":"酉"};
+        const pos = {"子":"酉","酉":"子","卯":"午","午":"卯","寅":"亥","亥":"寅","辰":"丑","丑":"辰","巳":"申","申":"巳","未":"戌","戌":"未"};
+
+        // 1. 天干动力学诊断
+        for(let i=0; i<allGans.length; i++) {
+            for(let j=i+1; j<allGans.length; j++) {
+                if(stemHe[allGans[i]] === allGans[j]) ganLogs.push(`<span class="badge-tag" style="border-color:var(--wuhang-mu); color:var(--wuhang-mu)">${allGans[i]}${allGans[j]}天干相合</span>`);
+                if(stemKe[allGans[i]] === allGans[j]) ganLogs.push(`<span class="badge-tag">${allGans[i]}克${allGans[j]}</span>`);
+            }
+        }
+        document.getElementById('gan-liuyi').innerHTML = ganLogs.length > 0 ? Array.from(new Set(ganLogs)).join(' ') : "天干气静流通";
+
+        // 2. 地支全息交叉诊断
+        for(let i=0; i<allZhis.length; i++) {
+            for(let j=i+1; j<allZhis.length; j++) {
+                const z1 = allZhis[i], z2 = allZhis[j];
+                if(chongs[z1] === z2) zhiLogs.push(`<span class="badge-tag" style="border-color:var(--wuhang-huo);color:var(--wuhang-huo)">${z1}${z2}地支相冲</span>`);
+                if(hex[z1] === z2) zhiLogs.push(`<span class="badge-tag" style="border-color:var(--wuhang-mu);color:var(--wuhang-mu)">${z1}${z2}地支六合</span>`);
+                if(hais[z1] === z2) zhiLogs.push(`<span class="badge-tag" style="border-color:var(--wuhang-jin);color:var(--wuhang-jin)">${z1}${z2}地支相害</span>`);
+                if(pos[z1] === z2) zhiLogs.push(`<span class="badge-tag" style="color:var(--wuhang-shui)">${z1}${z2}地支相破</span>`);
+                if(z1 === z2 && ["辰","午","酉","亥"].includes(z1)) zhiLogs.push(`<span class="badge-tag" style="color:var(--wuhang-tu)">${z1}${z2}自刑</span>`);
+            }
+        }
+
+        // 地支三刑断法补充
+        if(zhisStr.includes("寅") && zhisStr.includes("巳") && zhisStr.includes("申")) zhiLogs.push("<span class='badge-tag' style='color:red;'>寅巳申三刑(恃势之刑)</span>");
+        if(zhisStr.includes("丑") && zhisStr.includes("戌") && zhisStr.includes("未")) zhiLogs.push("<span class='badge-tag' style='color:red;'>丑戌未三刑(持势之刑)</span>");
+        if(zhisStr.includes("子") && zhisStr.includes("卯")) zhiLogs.push("<span class='badge-tag' style='color:red;'>子卯相刑(无恩之刑)</span>");
+
+        // 三合虚拱局判定
+        const sanHe = [ 
+            {arr:['申','子','辰'],gong:'子',name:'申辰拱子水局'}, 
+            {arr:['寅','午','戌'],gong:'午',name:'寅戌拱午火局'}, 
+            {arr:['亥','卯','未'],gong:'卯',name:'亥未拱卯木局'}, 
+            {arr:['巳','酉','丑'],gong:'酉',name:'巳丑拱酉金局'} 
+        ];
+        sanHe.forEach(sh => {
+            if(sh.arr.filter(z => zhisStr.includes(z)).length === 2 && !zhisStr.includes(sh.gong)) {
+                zhiLogs.push(`<span class="badge-tag" style="border-color:var(--wuhang-shui); color:var(--wuhang-shui)">${sh.name}</span>`);
+            }
+        });
+
+        document.getElementById('zhi-liuyi').innerHTML = zhiLogs.length > 0 ? Array.from(new Set(zhiLogs)).join(' ') : "地支沉静无冲合";
+    }
+
     // 核心重构：多维度交叉全局矩阵渲染器
     function renderMatrix() {
         const matrixContainer = document.getElementById('bazi-matrix');
         const me = globalState.me;
         
-        // 构建全量 6 柱序列组合
+        // 构建包含流月的 7 柱超矩阵大序列
         const currentPillars = [
+            { name: "流月", gan: globalState.currentLiuYue.substring(0,1), zhi: globalState.currentLiuYue.substring(1,2), isCtx: true },
             { name: "流年", gan: globalState.currentLiuNian.substring(0,1), zhi: globalState.currentLiuNian.substring(1,2), isCtx: true },
             { name: "大运", gan: globalState.currentDaYun.substring(0,1), zhi: globalState.currentDaYun.substring(1,2), isCtx: true },
             ...globalState.pillars
@@ -219,7 +345,7 @@
 
         rows.forEach((rowName, rIdx) => {
             htmlStr += `<div class="grid-cell header-cell">${rowName}</div>`;
-            currentPillars.forEach((p, pIdx) => {
+            currentPillars.forEach((p) => {
                 const ctxClass = p.isCtx ? "context-column" : "";
                 htmlStr += `<div class="grid-cell ${ctxClass}">`;
                 
@@ -230,9 +356,9 @@
                 } else if (rIdx === 2) {
                     htmlStr += `<span class="text-zhi ${WuhangMap[p.zhi]}">${p.zhi}</span>`;
                 } else if (rIdx === 3) {
-                    htmlStr += `<div class="bazi-grid" style="display:contents;">`;
-                    (CangGanFull[p.zhi] || []).forEach(cg => {
-                        htmlStr += `<div class="canggan-row"><span class="${WuhangMap[cg]}">${cg}</span><span style="color:#9ca3af;font-size:9px;">${calculate十神(me, cg).substring(0,2)}</span></div>`;
+                    htmlStr += `<div class="canggan-row">`;
+                    (CangGanPro[p.zhi] ? Object.keys(CangGanPro[p.zhi]) : []).forEach(cg => {
+                        htmlStr += `<div style="line-height:1.1;"><span class="${WuhangMap[cg]}">${cg}</span><span style="color:#9ca3af;font-size:9px;">${calculate十神(me, cg).substring(0,2)}</span></div>`;
                     });
                     htmlStr += `</div>`;
                 } else if (rIdx === 4) {
@@ -242,7 +368,7 @@
                 } else if (rIdx === 6) {
                     htmlStr += `<span style="font-size:10px;color:#6b7280">${getXunKong(p.gan, p.zhi)}</span>`;
                 } else if (rIdx === 7) {
-                    htmlStr += `<span style="font-size:10px; white-space:pre-line; color:#b45309">${calculate神煞(me, p.gan, p.zhi, globalState.pillars[1].zhi)}</span>`;
+                    htmlStr += `<span style="font-size:10px; white-space:pre-line; color:var(--primary-gold); font-weight:bold;">${calculate神煞(me, p.gan, p.zhi, globalState.pillars[1].zhi)}</span>`;
                 }
                 
                 htmlStr += `</div>`;
@@ -250,50 +376,14 @@
         });
 
         matrixContainer.innerHTML = htmlStr;
-        calculate交叉留意(currentPillars);
-    }
+        
+        // 激活动力学与量化面板
+        execute五行量化(currentPillars);
+        calculate交叉修剪(currentPillars);
 
-    // 问真级全方位动态交叉剪枝分析引擎
-    function calculate交叉留意(currentPillars) {
-        let ganLogs = [], zhiLogs = [];
-        const allGans = currentPillars.map(p => p.gan);
-        const allZhis = currentPillars.map(p => p.zhi);
-        const zhisStr = allZhis.join('');
-
-        const stemHe = {"甲":"己", "己":"甲", "乙":"庚", "庚":"乙", "丙":"辛", "辛":"丙", "丁":"壬", "壬":"丁", "戊":"癸", "癸":"戊"};
-        const stemKe = {"甲":"戊", "乙":"己", "丙":"庚", "丁":"辛", "戊":"壬", "己":"癸", "庚":"甲", "辛":"乙", "壬":"丙", "癸":"丁"};
-        const chongs = {"子":"午","丑":"未","寅":"申","卯":"酉","辰":"戌","巳":"亥"};
-        const hex = {"子":"丑","寅":"亥","卯":"戌","辰":"酉","巳":"申","午":"未"};
-
-        // 1. 天干动力分析
-        for(let i=0; i<allGans.length; i++) {
-            for(let j=i+1; j<allGans.length; j++) {
-                if(stemHe[allGans[i]] === allGans[j]) ganLogs.push(`<span class="badge-tag">${allGans[i]}${allGans[j]}相合</span>`);
-                if(stemKe[allGans[i]] === allGans[j]) ganLogs.push(`<span class="badge-tag">${allGans[i]}克${allGans[j]}</span>`);
-                if(stemKe[allGans[j]] === allGans[i]) ganLogs.push(`<span class="badge-tag">${allGans[j]}克${allGans[i]}</span>`);
-            }
-        }
-        document.getElementById('gan-liuyi').innerHTML = ganLogs.length > 0 ? Array.from(new Set(ganLogs)).join(' ') : "天干气静流通";
-
-        // 2. 地支动力分析
-        for(let i=0; i<allZhis.length; i++) {
-            for(let j=i+1; j<allZhis.length; j++) {
-                const z1 = allZhis[i], z2 = allZhis[j];
-                if(chongs[z1] === z2 || chongs[z2] === z1) zhiLogs.push(`<span class="badge-tag" style="border-color:var(--wuhang-huo);color:var(--wuhang-huo)">${z1}${z2}相冲</span>`);
-                if(hex[z1] === z2 || hex[z2] === z1) zhiLogs.push(`<span class="badge-tag" style="border-color:var(--wuhang-mu);color:var(--wuhang-mu)">${z1}${z2}六合</span>`);
-                if(z1 === z2 && ["辰","午","酉","亥"].includes(z1)) zhiLogs.push(`<span class="badge-tag">${z1}${z2}自刑</span>`);
-            }
-        }
-
-        // 高阶虚拱局判定
-        const sanHe = [ {arr:['申','子','辰'],gong:'子',name:'申辰拱子'}, {arr:['寅','午','戌'],gong:'午',name:'寅戌拱午'}, {arr:['亥','卯','未'],gong:'卯',name:'亥未拱卯'}, {arr:['巳','酉','丑'],gong:'酉',name:'巳丑拱酉'} ];
-        sanHe.forEach(sh => {
-            if(sh.arr.filter(z => zhisStr.includes(z)).length === 2 && !zhisStr.includes(sh.gong)) {
-                zhiLogs.push(`<span class="badge-tag" style="color:var(--wuhang-shui)">${sh.name}</span>`);
-            }
-        });
-
-        document.getElementById('zhi-liuyi').innerHTML = zhiLogs.length > 0 ? Array.from(new Set(zhiLogs)).join(' ') : "地支沉静无冲合";
+        // 《三命通会》日柱匹配渲染
+        let dayPillarStr = me + globalState.pillars[2].zhi; 
+        document.getElementById('guji-display').innerHTML = SanMingDB[dayPillarStr] || "【古籍简断】：此命盘局气通泰。日元自坐调候得宜，气脉悠长，凡行运至身旺及财官相生之地，必能因时借势，名利渐达。最喜原局清纯，岁运无强力冲刑破害。";
     }
 
     function execute排盘() {
@@ -326,6 +416,7 @@
 
         document.getElementById('result-card').style.display = 'block';
         document.getElementById('yun-card').style.display = 'block';
+        document.getElementById('score-card').style.display = 'block';
         document.getElementById('analysis-card').style.display = 'block';
 
         document.getElementById('meta-display').innerHTML = `
@@ -336,13 +427,13 @@
 
         update五行旺衰(globalState.pillars[1].zhi);
 
-        // 3. 构建起动大运链条与二级、三级联动机制
+        // 起动大运链条联动机制
         const yun = ba.getYun(gender);
         const dayunList = yun.getDaYun();
         const dyContainer = document.getElementById('dayun-timeline');
         dyContainer.innerHTML = '';
 
-        let activeIdx = 1; // 默认指向第一步大运
+        let activeIdx = 1; 
         dayunList.forEach((dy, index) => {
             if(index === 0) return;
             const gz = dy.getGanZhi();
@@ -367,7 +458,6 @@
         buildLiuNianTimeline(idx);
     }
 
-    // 根据选择的大运动态铺设 10 个流年卡片
     function buildLiuNianTimeline(yunIndex) {
         const lnContainer = document.getElementById('liunian-timeline');
         lnContainer.innerHTML = '';
@@ -377,7 +467,7 @@
 
         lnList.forEach((ln, idx) => {
             const gz = ln.getGanZhi();
-            if(idx === 0) globalState.currentLiuNian = gz; // 默认选中大运第一年
+            if(idx === 0) globalState.currentLiuNian = gz; 
 
             lnContainer.innerHTML += `
                 <div class="timeline-card ${idx === 0 ? 'active' : ''}" data-type="ln" onclick="switchLiuNian(this, '${gz}', ${ln.getYear()})">
@@ -387,26 +477,22 @@
             `;
         });
 
-        buildLiuYueTimeline(lnList[0].getYear());
-        renderMatrix();
+        buildLiuYueTimeline(globalState.currentLiuNian);
     }
 
     function switchLiuNian(el, gz, targetYear) {
         document.querySelectorAll('[data-type="ln"]').forEach(c => c.classList.remove('active'));
         el.classList.add('active');
         globalState.currentLiuNian = gz;
-        buildLiuYueTimeline(targetYear);
-        renderMatrix();
+        buildLiuYueTimeline(gz);
     }
 
-    // 根据选中的流年动态生成 12 流月精密天干地支
-    function buildLiuYueTimeline(targetYear) {
+    // 动态生成 12 流月精密天干地支并挂载联动
+    function buildLiuYueTimeline(yearGz) {
         const lyContainer = document.getElementById('liuyue-timeline');
         lyContainer.innerHTML = '';
         
-        // 依据流年五虎遁推算12流月干支
-        const monthZhis = ["丙寅", "丁卯", "戊辰", "己巳", "庚午", "辛未", "壬申", "癸酉", "甲戌", "乙亥", "丙子", "丁丑"];
-        const yearGan = globalState.currentLiuNian.substring(0,1);
+        const yearGan = yearGz.substring(0,1);
         let startGanIdx = 0; // 甲己之年丙作首
         if(["乙","庚"].includes(yearGan)) startGanIdx = 2; // 乙庚之岁戊为头
         if(["丙","辛"].includes(yearGan)) startGanIdx = 4; // 丙辛之岁寻庚上
@@ -414,17 +500,31 @@
         if(["戊","癸"].includes(yearGan)) startGanIdx = 8; // 戊癸何方发甲寅
 
         const monthsName = ["立春","惊蛰","清明","立夏","芒种","小暑","立秋","白露","寒露","立冬","大雪","小寒"];
-
+        
+        let firstMonthGz = "";
         for(let i=0; i<12; i++) {
             const g = Gan[(startGanIdx + i) % 10];
             const z = Zhi[(2 + i) % 12]; // 正月建寅
+            const fullGz = g + z;
+            if(i === 0) firstMonthGz = fullGz;
+
             lyContainer.innerHTML += `
-                <div class="timeline-card">
+                <div class="timeline-card ${i === 0 ? 'active' : ''}" data-type="ly" onclick="switchLiuYue(this, '${fullGz}')">
                     <div style="color:#6b7280; font-size:9px;">${monthsName[i]}</div>
-                    <div class="card-title ${WuhangMap[z]}">${g}${z}</div>
+                    <div class="card-title ${WuhangMap[z]}">${fullGz}</div>
                 </div>
             `;
         }
+        
+        globalState.currentLiuYue = firstMonthGz; 
+        renderMatrix();
+    }
+
+    function switchLiuYue(el, gz) {
+        document.querySelectorAll('[data-type="ly"]').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        globalState.currentLiuYue = gz;
+        renderMatrix();
     }
 
     window.onload = execute排盘;
