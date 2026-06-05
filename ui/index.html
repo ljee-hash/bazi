@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>问真风格专业八字细盘系统</title>
+    <style>
+        :root {
+            --bg-main: #f8f9fa;
+            --bg-card: #ffffff;
+            --border-color: #e9ecef;
+            --text-dark: #212529;
+            --text-muted: #6c757d;
+            
+            /* 五行标准配色 */
+            --wuhang-mu: #2e7d32;    /* 木-绿 */
+            --wuhang-huo: #d32f2f;   /* 火-红 */
+            --wuhang-tu: #8d6e63;    /* 土-褐 */
+            --wuhang-jin: #b58d12;   /* 金-金黄 */
+            --wuhang-shui: #1976d2;  /* 水-蓝 */
+            
+            /* 十神配色 */
+            --shen-cai: #e65100;    /* 财星-橙 */
+            --shen-guan: #4a148c;   /* 官杀-紫 */
+            --shen-yin: #006064;    /* 印星-青 */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-dark); padding: 15px; display: flex; justify-content: center; }
+        .bazi-container { width: 100%; max-width: 600px; background: var(--bg-card); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; }
+
+        /* 顶部导航 */
+        .tab-nav { display: flex; background: #000; padding: 5px 0; }
+        .tab-item { flex: 1; text-align: center; color: #aaa; font-size: 14px; padding: 10px 0; cursor: pointer; }
+        .tab-item.active { color: #f5b041; font-weight: bold; position: relative; }
+
+        /* 基本信息区 */
+        .info-bar { padding: 12px 15px; font-size: 13px; color: var(--text-muted); border-bottom: 1px solid var(--border-color); line-height: 1.6; }
+        .info-bar strong { color: var(--text-dark); }
+
+        /* 八字核心细盘矩阵 */
+        .bazi-grid { display: grid; grid-template-columns: 60px repeat(4, 1fr); border-bottom: 1px solid var(--border-color); }
+        .grid-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 2px; font-size: 13px; border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); text-align: center; }
+        .grid-cell:last-child { border-right: none; }
+        
+        /* 头部侧边特征列 */
+        .header-column { background: #fdfefe; font-weight: 500; color: var(--text-muted); }
+        
+        /* 天干地支大字样式 */
+        .text-gan, .text-zhi { font-size: 26px; font-weight: bold; margin: 4px 0; font-family: "STKaiti", "KaiTi", serif; }
+        
+        /* 五行颜色动态绑定类 */
+        .mu { color: var(--wuhang-mu); }
+        .huo { color: var(--wuhang-huo); }
+        .tu { color: var(--wuhang-tu); }
+        .jin { color: var(--wuhang-jin); }
+        .shui { color: var(--wuhang-shui); }
+
+        /* 藏干微型布局 */
+        .canggan-box { display: flex; flex-direction: column; gap: 2px; font-size: 11px; width: 100%; padding: 0 4px; }
+        .canggan-row { display: flex; justify-content: space-between; width: 100%; width: 50px; margin: 0 auto;}
+
+        /* 大运/流年时间轴区块 */
+        .timeline-section { padding: 15px; border-bottom: 1px solid var(--border-color); }
+        .section-title { font-size: 14px; font-weight: bold; margin-bottom: 10px; color: #333; display: flex; align-items: center; gap: 5px; }
+        .section-title::before { content: ''; display: inline-block; width: 4px; height: 14px; background: #f5b041; border-radius: 2px; }
+
+        .scroll-wrapper { display: flex; overflow-x: auto; gap: 8px; padding-bottom: 8px; scrollbar-width: thin; }
+        .scroll-wrapper::-webkit-scrollbar { height: 5px; }
+        .scroll-wrapper::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+
+        .timeline-card { flex: 0 0 75px; background: #fdfefe; border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 4px; text-align: center; font-size: 12px; cursor: pointer; transition: all 0.2s; }
+        .timeline-card.active { border-color: #d32f2f; background: #fff5f5; box-shadow: 0 2px 6px rgba(211,47,47,0.15); }
+        .card-title { font-weight: bold; font-size: 14px; margin: 2px 0; }
+        .card-badge { font-size: 10px; padding: 1px 4px; border-radius: 3px; background: #eee; display: inline-block; margin-top: 4px; }
+
+        /* 地支关系提示栏 */
+        .notice-bar { padding: 10px 15px; background: #fffdf9; font-size: 12px; border-bottom: 1px solid var(--border-color); }
+        .notice-item { margin-bottom: 4px; display: flex; gap: 8px; }
+        .notice-tag { background: #f5b041; color: #fff; padding: 0px 4px; border-radius: 3px; font-size: 11px; }
+
+        /* 分析断语区 */
+        .analysis-box { padding: 15px; background: #fafafa; font-size: 13px; line-height: 1.6; }
+        .analysis-item { padding: 8px 12px; background: #fff; border-left: 3px solid #757575; margin-bottom: 8px; border-radius: 0 4px 4px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+    </style>
+</head>
+<body>
+
+<div class="bazi-container">
+    <div class="tab-nav">
+        <div class="tab-item">基本信息</div>
+        <div class="tab-item">基本排盘</div>
+        <div class="tab-item active">专业细盘</div>
+        <div class="tab-item">断事笔记</div>
+    </div>
+
+    <div class="info-bar" id="meta-info">
+        载入中...
+    </div>
+
+    <div class="bazi-grid" id="bazi-matrix">
+        </div>
+
+    <div class="notice-bar">
+        <div class="notice-item"><span class="notice-tag">天干留意</span><span id="gan-notice">--</span></div>
+        <div class="notice-item"><span class="notice-tag">地支留意</span><span id="zhi-notice">--</span></div>
+    </div>
+
+    <div class="timeline-section">
+        <div class="section-title">大运周期</div>
+        <div class="scroll-wrapper" id="dayun-timeline"></div>
+    </div>
+
+    <div class="timeline-section">
+        <div class="section-title">流年步履</div>
+        <div class="scroll-wrapper" id="liunian-timeline"></div>
+    </div>
+
+    <div class="analysis-box">
+        <div class="section-title" style="margin-bottom:12px;">命理特征与格局甄别</div>
+        <div id="analysis-content"></div>
+    </div>
+</div>
+
+<script>
+    // 模拟从 bazi.py 结构化清洗后输出的 JSON 数据包
+    const baziData = {
+        meta: {
+            sex: "男",
+            solar: "1998年11月14日 23:45",
+            lunar: "戊寅年九月廿六日子时",
+            startYun: "出生后9年10个月9天起运",
+            mingGong: "卯", taiYuan: "癸丑", shenGong: "乙卯"
+        },
+        pillars: {
+            headers: ["主星", "天干", "地支", "藏干", "星运", "自坐", "空亡", "纳音", "神煞"],
+            columns: [
+                { role: "年柱", shishen: "偏印", gan: "庚", ganWuhang: "jin", zhi: "寅", zhiWuhang: "mu", canggan: [{g:"甲",s:"食神",w:"mu"},{g:"丙",s:"偏财",w:"huo"},{g:"戊",s:"七杀",w:"tu"}], xingyun: "病", zizuo: "绝", kongwang: "午未", nayin: "松柏木", shens: "太极贵人" },
+                { role: "月柱", shishen: "偏财", gan: "丙", ganWuhang: "huo", zhi: "戌", zhiWuhang: "tu", canggan: [{g:"戊",s:"七杀",w:"tu"},{g:"辛",s:"正印",w:"jin"},{g:"丁",s:"正财",w:"huo"}], xingyun: "冠带", zizuo: "墓", kongwang: "午未", nayin: "屋上土", shens: "天德贵人" },
+                { role: "日柱", shishen: "元男", gan: "壬", ganWuhang: "shui", zhi: "辰", zhiWuhang: "tu", canggan: [{g:"戊",s:"七杀",w:"tu"},{g:"乙",s:"伤官",w:"mu"},{g:"癸",s:"劫财",w:"shui"}], xingyun: "墓", zizuo: "墓", kongwang: "午未", nayin: "长流水", shens: "阴差阳错" },
+                { role: "时柱", shishen: "劫财", gan: "癸", ganWuhang: "shui", zhi: "卯", zhiWuhang: "mu", canggan: [{g:"乙",s:"伤官",w:"mu"}], xingyun: "死", zizuo: "长生", kongwang: "辰巳", nayin: "金箔金", shens: "天乙贵人" }
+            ]
+        },
+        notices: {
+            gan: "丙庚相克; 壬丙相冲",
+            zhi: "寅戌半合火局; 卯戌合; 辰戌相冲"
+        },
+        dayun: [
+            { range: "2010-2020", age: "11岁", gz: "丁亥", shishen: "正财" },
+            { range: "2020-2030", age: "21岁", gz: "戊子", shishen: "七杀", active: true },
+            { range: "2030-2040", age: "31岁", gz: "己丑", shishen: "正官" },
+            { range: "2040-2050", age: "41岁", gz: "庚寅", shishen: "偏印" }
+        ],
+        liunian: [
+            { year: "2024", gz: "甲辰", shishen: "食神" },
+            { year: "2025", gz: "乙巳", shishen: "伤官" },
+            { year: "2026", gz: "丙午", shishen: "偏财", active: true },
+            { year: "2027", gz: "丁未", shishen: "正财" }
+        ],
+        alerts: [
+            "格局选用：杂气偏财格。喜身强财旺，忌比劫夺财。",
+            "自坐劫库：日支坐辰土水库，需防晚运资产暗损或亲属缘薄。",
+            "地支具冲：日支辰与月支戌构成‘辰戌相冲’，注意土气激荡及脾胃健康。"
+        ]
+    };
+
+    function renderBazi() {
+        // 1. 渲染基础元信息
+        document.getElementById('meta-info').innerHTML = `
+            <strong>${baziData.meta.sex}命</strong> &nbsp;&nbsp;公历: <strong>${baziData.meta.solar}</strong><br>
+            农历: ${baziData.meta.lunar} &nbsp;&nbsp; 运势: ${baziData.meta.startYun}<br>
+            命宫: <strong>${baziData.meta.mingGong}</strong> &nbsp;&nbsp; 胎元: <strong>${baziData.meta.taiYuan}</strong> &nbsp;&nbsp; 身宫: <strong>${baziData.meta.shenGong}</strong>
+        `;
+
+        // 2. 渲染核心排盘九宫矩阵
+        const matrixContainer = document.getElementById('bazi-matrix');
+        let matrixHtml = '';
+
+        baziData.pillars.headers.forEach((header, rowIndex) => {
+            // 渲染左侧表头列单元
+            matrixHtml += `<div class="grid-cell header-column">${header}</div>`;
+            
+            // 循环渲染年、月、日、时四柱对应行元素
+            baziData.pillars.columns.forEach(col => {
+                matrixHtml += `<div class="grid-cell">`;
+                switch(rowIndex) {
+                    case 0: matrixHtml += `<span>${col.shishen}</span>`; break;
+                    case 1: matrixHtml += `<span class="text-gan ${col.ganWuhang}">${col.gan}</span>`; break;
+                    case 2: matrixHtml += `<span class="text-zhi ${col.zhiWuhang}">${col.zhi}</span>`; break;
+                    case 3: 
+                        matrixHtml += `<div class="canggan-box">`;
+                        col.canggan.forEach(cg => {
+                            matrixHtml += `<div class="canggan-row"><span class="${col.zhiWuhang}">${cg.g}</span><span style="color:#666">${cg.s[0]}${cg.s[1]}</span></div>`;
+                        });
+                        matrixHtml += `</div>`;
+                        break;
+                    case 4: matrixHtml += `<span>${col.xingyun}</span>`; break;
+                    case 5: matrixHtml += `<span>${col.zizuo}</span>`; break;
+                    case 6: matrixHtml += `<span style="color:var(--wuhang-huo)">${col.kongwang}</span>`; break;
+                    case 7: matrixHtml += `<span style="font-size:11px;color:#666;">${col.nayin}</span>`; break;
+                    case 8: matrixHtml += `<span style="font-size:11px;color: #b58d12;">${col.shens}</span>`; break;
+                }
+                matrixHtml += `</div>`;
+            });
+        });
+        matrixContainer.innerHTML = matrixHtml;
+
+        // 3. 提示层注入
+        document.getElementById('gan-notice').innerText = baziData.notices.gan;
+        document.getElementById('zhi-notice').innerText = baziData.notices.zhi;
+
+        // 4. 大运流年横向时间轴渲染
+        const dyContainer = document.getElementById('dayun-timeline');
+        baziData.dayun.forEach(dy => {
+            dyContainer.innerHTML += `
+                <div class="timeline-card ${dy.active ? 'active' : ''}">
+                    <div style="font-size:11px; color:#666;">${dy.age}</div>
+                    <div class="card-title">${dy.gz}</div>
+                    <div class="card-badge">${dy.shishen}</div>
+                </div>
+            `;
+        });
+
+        const lnContainer = document.getElementById('liunian-timeline');
+        baziData.liunian.forEach(ln => {
+            lnContainer.innerHTML += `
+                <div class="timeline-card ${ln.active ? 'active' : ''}">
+                    <div style="font-size:11px; color:#666;">${ln.year}</div>
+                    <div class="card-title" style="color:var(--wuhang-huo);">${ln.gz}</div>
+                    <div class="card-badge">${ln.shishen}</div>
+                </div>
+            `;
+        });
+
+        // 5. 注入智能分析断语
+        const alertContainer = document.getElementById('analysis-content');
+        baziData.alerts.forEach(item => {
+            alertContainer.innerHTML += `<div class="analysis-item">${item}</div>`;
+        });
+    }
+
+    // 执行渲染流程
+    window.onload = renderBazi;
+</script>
+</body>
+</html>
